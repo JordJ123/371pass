@@ -33,6 +33,7 @@ namespace App {
 
     cxxopts::Options cxxoptsSetup();
 
+    std::string parseDatabaseArgument(cxxopts::ParseResult &args);
     App::Action parseActionArgument(cxxopts::ParseResult &args);
     std::string parseCategoryArgument(cxxopts::ParseResult &args);
 

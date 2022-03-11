@@ -73,7 +73,7 @@ bool Category::addItem(Item& item) {
     } else {
         Item chosenItem = items.at(item.getIdent());
         for (auto& entry : item.getEntries()) {
-            chosenItem.addEntry(entry);
+            chosenItem.addEntry(entry.first, entry.second);
         }
         return false;
     }

@@ -28,19 +28,14 @@ int App::run(int argc, char *argv[]) {
 		return 0;
     }
 
-    // Opens the chosen database and construct the wallet using it
-    std::string db;
-    Wallet wObj{};
-    try {
-		db = args["database"].as<std::string>();
-    } catch (const cxxopts::option_not_present_exception&) {
-		db = "database";
-    }
-    wObj.load(db);
-
-	//Selects the chosen action and updates the data based on it
+    //Parses the command line arguments
+	std::string db = parseDatabaseArgument(args);
     const Action a = parseActionArgument(args);
 	std::string categoryIdent = parseCategoryArgument(args);
+
+	//Updates data based on the command line arguments
+	Wallet wObj{};
+    wObj.load(db);
     switch (a) {
 		case Action::CREATE:
 			if (categoryIdent != "") {
@@ -116,6 +111,16 @@ cxxopts::Options App::cxxoptsSetup() {
 	"h,help", "Print usage.");
 
     return cxxopts;
+}
+
+//Gets the database filename from the command line if one is given 
+//(database.json if not)
+std::string App::parseDatabaseArgument(cxxopts::ParseResult &args) {
+	try {
+		return args["database"].as<std::string>();
+    } catch (const cxxopts::option_not_present_exception&) {
+		return "database.json";
+    }
 }
 
 //Gets the action argument from the command line if one is given

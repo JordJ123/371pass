@@ -43,8 +43,7 @@ class Item {
     //Other Methods
     public:
         void load(nlohmann::json::iterator& item);
-        bool addEntry(std::string& key, std::string& value);
-        bool addEntry(std::pair<const std::string, std::string>& entry);
+        bool addEntry(const std::string& key, const std::string& value);
         bool deleteEntry(std::string& key);
         unsigned int size();
         bool empty();

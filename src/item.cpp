@@ -49,22 +49,12 @@ void Item::load(nlohmann::json::iterator& item) {
     }
 }
 
-bool Item::addEntry(std::string& key, std::string& value) {
+bool Item::addEntry(const std::string& key, const std::string& value) {
     if (entries.count(key) != 1) {
         entries.emplace(key, value);
         return true;
     } else {
         entries.emplace(key, value);
-        return false;
-    }
-}
-
-bool Item::addEntry(std::pair<const std::string, std::string>& entry) {
-    if (entries.count(entry.first) != 1) {
-        entries.emplace(entry.first, entry.second);
-        return true;
-    } else {
-        entries.emplace(entry.first, entry.second);
         return false;
     }
 }

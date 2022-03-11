@@ -29,9 +29,9 @@ Category& Wallet::getCategory(const std::string& categoryIdentifier) {
 
 void Wallet::load(const std::string& filename) {
     std::ifstream databaseFile;
-    databaseFile.open(filename + ".json");
+    databaseFile.open(filename);
     if (!databaseFile.is_open()) {
-        std::cerr << filename << ".json could not be open or does not exist\n";
+        std::cerr << filename << " could not be open or does not exist\n";
         std::exit(1);
     }
     nlohmann::json walletJSON = nlohmann::json::parse(databaseFile);
@@ -45,12 +45,12 @@ void Wallet::load(const std::string& filename) {
 
 void Wallet::save(const std::string& filename) {
     std::ofstream databaseFile;
-    databaseFile.open(filename + ".json");
+    databaseFile.open(filename);
     if (!databaseFile.is_open()) {
-        std::cerr << filename << ".json could not be open or does not exist\n";
+        std::cerr << filename << " could not be open or does not exist\n";
         std::exit(1);
     }
-    databaseFile << json().dump(2);
+    databaseFile << json().dump();
     databaseFile.close();
 }
 
