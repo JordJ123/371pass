@@ -34,11 +34,20 @@ class Category {
     public:
         void setIdent(const std::string& identifier);
         std::string& getIdent();
+        std::map<std::string, Item>& getItems();
+        Item& getItem(const std::string& itemIdentifier);
 
     //Other Methods()
     public:
+        void load(nlohmann::json::iterator& category);
+        Item& newItem(const std::string& itemIdentifier);
+        bool addItem(Item& item);
+        bool deleteItem(const std::string& itemIdentifier);
         unsigned int size();
         bool empty();
+        std::string str();
+        nlohmann::json json();
+        friend bool operator==(const Category& lhs, const Category& rhs);
 
 };
 

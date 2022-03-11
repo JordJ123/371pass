@@ -9,12 +9,11 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include "lib_json.hpp"
 #include "category.h"
 #include "item.h"
 #include "wallet.h"
-
-using json = nlohmann::json;
 
 Wallet::Wallet() {}
 
@@ -22,8 +21,9 @@ Category& Wallet::getCategory(const std::string& categoryIdentifier) {
     if (categories.count(categoryIdentifier) == 1) {
         return categories.at(categoryIdentifier);
     } else {
-        throw std::runtime_error("Unable to get category with identifer "
-            + categoryIdentifier);
+        throw std::out_of_range(
+            "Unable to get category. Item with the identifier " 
+                + categoryIdentifier + " does not exist");
     }
 }
 
@@ -34,11 +34,23 @@ void Wallet::load(const std::string& filename) {
         std::cerr << filename << ".json could not be open or does not exist\n";
         std::exit(1);
     }
-    json wallet = json::parse(databaseFile);
-    json::iterator category;
-    for (category = wallet.begin(); category != wallet.end(); ++category) {
-        newCategory(category.key());
+    nlohmann::json walletJSON = nlohmann::json::parse(databaseFile);
+    nlohmann::json::iterator category;
+    for (category = walletJSON.begin(); category != walletJSON.end();
+        ++category) {
+        newCategory(category.key()).load(category);
     }
+    databaseFile.close();
+}
+
+void Wallet::save(const std::string& filename) {
+    std::ofstream databaseFile;
+    databaseFile.open(filename + ".json");
+    if (!databaseFile.is_open()) {
+        std::cerr << filename << ".json could not be open or does not exist\n";
+        std::exit(1);
+    }
+    databaseFile << json().dump(2);
     databaseFile.close();
 }
 
@@ -65,7 +77,10 @@ bool Wallet::addCategory(Category& category) {
         }
         return true;
     } else {
-        //Add Categories Items
+        Category chosenCategory = categories.at(category.getIdent());
+        for (auto& item : category.getItems()) {
+            chosenCategory.addItem(item.second);
+        }
         return false;
     }
 }
@@ -74,8 +89,9 @@ bool Wallet::deleteCategory(const std::string& categoryIdentifier) {
     if (categories.count(categoryIdentifier) == 1) {
         return categories.erase(categoryIdentifier);
     } else {
-        throw std::runtime_error("Unable to delete category with identifer "
-            + categoryIdentifier);
+        throw std::out_of_range(
+            "Unable to delete category. Category with the identifier " 
+                + categoryIdentifier + " does not exist");
     }
 }
 
@@ -87,27 +103,27 @@ bool Wallet::empty() {
     return categories.empty();
 }
 
-// TODO Write a function ,save, that takes one parameter, the path of the file
-//  to write the database to. The function should serialise the Wallet object
-//  as JSON.
-// Example:
-//  Wallet wObj{};
-//  wObj.load("database.json");
-//  wObj.save("database.json");
+std::string Wallet::str() {
+    std::stringstream ss;
+    ss << json();
+    return ss.str();
+}
 
-// TODO Write an == operator overload for the Wallet class, such that two
-//  Wallet objects are equal only if they have the exact same data.
-// Example:
-//  Wallet wObj1{};
-//  Wallet wObj2{};
-//  if(wObj1 == wObj2) {
-//    ...
-//  }
+nlohmann::json Wallet::json() {
+    nlohmann::json json;
+    for (auto& category : categories) {
+        json[category.second.getIdent()] = category.second.json();
+    }
+    return json;
+}
 
-// TODO Write a function, str, that takes no parameters and returns a
-//  std::string of the JSON representation of the data in the Wallet.
-// Hint:
-//  See the coursework specification for how this JSON should look.
-// Example:
-//  Wallet wObj{};
-//  std::string s = wObj.str();
+bool operator==(const Wallet& lhs, const Wallet& rhs) {
+    for (const auto& lhsCategory : lhs.categories) {
+        for (const auto& rhsCategory : rhs.categories) {
+            if (!(lhsCategory == rhsCategory)) {
+                return false;        
+            }
+        }
+    }
+    return true;
+}

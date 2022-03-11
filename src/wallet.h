@@ -16,6 +16,7 @@
 
 #include <map>
 #include <string>
+#include "lib_json.hpp"
 #include "category.h"
 
 class Wallet {
@@ -36,11 +37,15 @@ class Wallet {
     //Other Methods
     public:
         void load(const std::string& filename);
+        void save(const std::string& filename);
         Category& newCategory(const std::string& categoryIdentifier);
         bool addCategory(Category& category);
         bool deleteCategory(const std::string& categoryIdentifier);
         unsigned int size();
         bool empty();
+        std::string str();
+        nlohmann::json json();
+        friend bool operator==(const Wallet& lhs, const Wallet& rhs);
   
 };
 
