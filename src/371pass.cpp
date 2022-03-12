@@ -39,10 +39,14 @@ int App::run(int argc, char *argv[]) {
     switch (a) {
 		case Action::CREATE:
 			if (categoryIdent != "") {
-				wObj.newCategory(categoryIdent);
+				createCategory(wObj, categoryIdent);
+			} else {
+				std::fprintf(stderr, "Please provide arguments on what to "
+					"create in terms of category or item. Use -h or --help "
+					"for more information");
+				exit(1);
 			}
 			wObj.save(db);
-			exit(0);
 			break;
 		case Action::READ:
 			if (categoryIdent != "") {
@@ -50,21 +54,33 @@ int App::run(int argc, char *argv[]) {
 			} else {
 				readWallet(wObj);
 			}
-			exit(0);
 			break;
 		case Action::UPDATE:
 			if (categoryIdent != "") {
 				updateCategory(wObj, categoryIdent);
+			} else {
+				std::fprintf(stderr, "Please provide arguments on what to "
+					"update in terms of category or item. Use -h or --help "
+					"for more information");
+				exit(1);
 			}
 			wObj.save(db);
-			exit(0);
 			break;
 		case Action::DELETE:
-			throw std::runtime_error("delete not implemented");
+			if (categoryIdent != "") {
+				deleteCategory(wObj, categoryIdent);
+			} else {
+				std::fprintf(stderr, "Please provide arguments on what to "
+					"delete in terms of category or item. Use -h or --help "
+					"for more information");
+				exit(1);
+			}
+			wObj.save(db);
 			break;
 		default:
 			throw std::runtime_error("Unknown action not implemented");
     }
+	exit(0);
     return 0;
 
 }
@@ -157,6 +173,11 @@ std::string App::parseCategoryArgument(cxxopts::ParseResult &args) {
 	}
 }
 
+//Creates the category in the given wallet and with the given categoryIdentifier
+void App::createCategory(Wallet& wObj, const std::string& categoryIdent) {
+	wObj.newCategory(categoryIdent);
+}
+
 //Reads the given wallet
 void App::readWallet(Wallet& wObj) {
 	std::fprintf(stdout, "%s\n", getJSON(wObj).c_str());	
@@ -166,8 +187,8 @@ void App::readWallet(Wallet& wObj) {
 void App::readCategory(Wallet& wObj, const std::string& categoryIdent) {
 	try {
 		std::fprintf(stdout, "%s\n", getJSON(wObj, categoryIdent).c_str());	
-	} catch (std::invalid_argument& exception) {
-		std::fprintf(stdout, "%s\n", exception.what());
+	} catch (std::out_of_range& exception) {
+		std::fprintf(stderr, "%s\n", exception.what());
 		exit(1);
 	}
 }
@@ -185,8 +206,18 @@ void App::updateCategory(Wallet& wObj, const std::string& categoryIdent) {
 				"format oldIdentifier:newIdentifier");
 			exit(1);
 		}
-	} catch (std::invalid_argument& ex) {
-		std::fprintf(stderr, "%s\n", ex.what());
+	} catch (std::invalid_argument& exception) {
+		std::fprintf(stderr, "%s\n", exception.what());
+		exit(1);
+	}
+}
+
+//Deletes the category based on the given wallet and category identifier
+void App::deleteCategory(Wallet& wObj, const std::string& categoryIdent) {
+	try {
+		wObj.deleteCategory(categoryIdent);
+	} catch (std::out_of_range& exception) {
+		std::fprintf(stderr, "%s\n", exception.what());
 		exit(1);
 	}
 }

@@ -14,22 +14,28 @@
 #include "lib_json.hpp"
 #include "item.h"
 
+//Creates a item with no identifier
 Item::Item() {}
 
+//Creates a item with the given identifier
 Item::Item(const std::string& identifier) : ident(identifier) {}
 
+//Sets the identifer of the item
 void Item::setIdent(const std::string& identifier) {
     ident = identifier;
 }
 
+//Gets the identifier of the item
 std::string& Item::getIdent() {
     return ident;
 }
 
+//Gets all the entries from the item
 std::map<std::string, std::string>& Item::getEntries() {
     return entries;
 }
 
+//Gets the entry with the given key from the item
 std::string& Item::getEntry(const std::string& key) {
     if (entries.count(key) == 1) {
         return entries.at(key);
@@ -39,6 +45,7 @@ std::string& Item::getEntry(const std::string& key) {
     }
 }
 
+//Loads entries into the item from the given database json
 void Item::load(nlohmann::json::iterator& item) {
     nlohmann::json itemJSON = item.value();
     nlohmann::json::iterator entry;
@@ -49,6 +56,7 @@ void Item::load(nlohmann::json::iterator& item) {
     }
 }
 
+//Creates a new entry with the given key and value and adds it to the item
 bool Item::addEntry(const std::string& key, const std::string& value) {
     if (entries.count(key) != 1) {
         entries.emplace(key, value);
@@ -59,6 +67,7 @@ bool Item::addEntry(const std::string& key, const std::string& value) {
     }
 }
 
+//Deletes the entry with the given key from the item
 bool Item::deleteEntry(std::string& key) {
     if (entries.count(key) == 1) {
         entries.erase(key);
@@ -70,14 +79,33 @@ bool Item::deleteEntry(std::string& key) {
     }
 }
 
+//Gets how many entries are in the item
 unsigned int Item::size() {
     return entries.size();
 }
 
+//Gets true if there are no entries in the item
 bool Item::empty() {
     return entries.empty();
 }
 
+//Gets the item in JSON string format
+std::string Item::str() {
+    std::stringstream ss;
+    ss << json();
+    return ss.str();
+}
+
+//Gets the item in JSON format
+nlohmann::json Item::json() {
+    nlohmann::json json;
+    for (const auto& entry : entries) {
+        json[entry.first] = entry.second;
+    }
+    return json;
+}
+
+//Checks if the two items are equal based on thier identifiers and entries
 bool operator==(const Item& lhs, const Item& rhs) {
     if (lhs.ident.compare(rhs.ident) == 0) {
         for (const auto& lhsEntry : lhs.entries) {
@@ -91,18 +119,3 @@ bool operator==(const Item& lhs, const Item& rhs) {
     }
     return true;
 }
-
-std::string Item::str() {
-    std::stringstream ss;
-    ss << json();
-    return ss.str();
-}
-
-nlohmann::json Item::json() {
-    nlohmann::json json;
-    for (const auto& entry : entries) {
-        json[entry.first] = entry.second;
-    }
-    return json;
-}
-

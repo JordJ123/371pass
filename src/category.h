@@ -37,7 +37,7 @@ class Category {
         std::map<std::string, Item>& getItems();
         Item& getItem(const std::string& itemIdentifier);
 
-    //Other Methods()
+    //Other Methods
     public:
         void load(nlohmann::json::iterator& category);
         Item& newItem(const std::string& itemIdentifier);

@@ -20,8 +20,10 @@
 
 namespace App {
 
+    //CONSTANTS
     const std::string STUDENT_NUMBER = "1910397";
 
+    //ENUMS
     enum Action { 
         CREATE, 
         READ, 
@@ -29,23 +31,34 @@ namespace App {
         DELETE 
     };
 
+    //Main Method
     int run(int argc, char *argv[]);
-
+   
+    //Parse Command Line Argument Methods
     cxxopts::Options cxxoptsSetup();
-
     std::string parseDatabaseArgument(cxxopts::ParseResult &args);
     App::Action parseActionArgument(cxxopts::ParseResult &args);
     std::string parseCategoryArgument(cxxopts::ParseResult &args);
 
+    //Create Methods
+    void createCategory(Wallet& wObj, const std::string& categoryIdentifier);
+
+    //Read Methods
     void readWallet(Wallet& wObj);
     void readCategory(Wallet& wObj, const std::string& categoryIdentifier);
+
+    //Update Methods
     void updateCategory(Wallet& wObj, const std::string& categoryIdent);
 
+    //Delete Methods
+    void deleteCategory(Wallet& wObj, const std::string& categoryIdent);
+
+    //Gets JSON Methods
     std::string getJSON(Wallet &w);
     std::string getJSON(Wallet &w, const std::string &c);
     std::string getJSON(Wallet &w, const std::string &c, const std::string &i);
-    std::string getJSON(Wallet &wObj, const std::string &c, const std::string &i,
-                        const std::string &e);
+    std::string getJSON(Wallet &wObj, const std::string &c, 
+        const std::string &i, const std::string &e);
 
 }
 

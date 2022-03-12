@@ -32,6 +32,7 @@ class Wallet {
 
     //Getter Methods
     public:
+        std::map<std::string, Category>& getCategories();
         Category& getCategory(const std::string& categoryIdentifier);
 
     //Other Methods

@@ -13,23 +13,28 @@
 #include "lib_json.hpp"
 #include "category.h"
 
+//Creates a category with no identifier
 Category::Category() {}
 
+//Creates a category with the given identifier
 Category::Category(const std::string& identifier) : ident(identifier) {}
 
+//Sets the identifer of the category
 void Category::setIdent(const std::string& identifier) {
     ident = identifier;
 }
 
+//Gets the identifier of the category
 std::string& Category::getIdent() {
     return ident;
 }
 
-
+//Gets all the items from the category
 std::map<std::string, Item>& Category::getItems() {
     return items;
 }
 
+//Gets the item with the given identifier from the category
 Item& Category::getItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) == 1) {
         return items.at(itemIdentifier);
@@ -40,6 +45,7 @@ Item& Category::getItem(const std::string& itemIdentifier) {
     }
 }
 
+//Loads items into the category from the given database json
 void Category::load(nlohmann::json::iterator& category) {
     nlohmann::json categoryJSON = category.value();
     nlohmann::json::iterator item;
@@ -48,6 +54,7 @@ void Category::load(nlohmann::json::iterator& category) {
     }
 }
 
+//Creates a new item with the given identifier and adds it to the category
 Item& Category::newItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) != 1) {
         Item item(itemIdentifier);
@@ -61,6 +68,7 @@ Item& Category::newItem(const std::string& itemIdentifier) {
     return items.at(itemIdentifier);
 }
 
+//Adds the item given to the category
 bool Category::addItem(Item& item) {
     if (items.count(item.getIdent()) != 1) {
         try {
@@ -79,6 +87,7 @@ bool Category::addItem(Item& item) {
     }
 }
 
+//Deletes the item with the given identifier from the category
 bool Category::deleteItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) == 1) {
         return items.erase(itemIdentifier);
@@ -89,14 +98,33 @@ bool Category::deleteItem(const std::string& itemIdentifier) {
     }
 }
 
+//Gets how many items are in the category
 unsigned int Category::size() {
     return items.size();
 }
 
+//Gets true if there are no items in the category
 bool Category::empty() {
     return items.empty();
 }
 
+//Gets the category in JSON string format
+std::string Category::str() {
+    std::stringstream ss;
+    ss << json();
+    return ss.str();
+}
+
+//Gets the category in JSON format
+nlohmann::json Category::json() {
+    nlohmann::json json;
+    for (auto& item : items) {
+        json[item.second.getIdent()] = item.second.json(); 
+    }
+    return json;
+}
+
+//Checks if the two categories are equal based on thier identifiers and items
 bool operator==(const Category& lhs, const Category& rhs) {
     if (lhs.ident.compare(rhs.ident) == 0) {
         for (const auto& lhsItem : lhs.items) {
@@ -108,18 +136,4 @@ bool operator==(const Category& lhs, const Category& rhs) {
         }
     }
     return true;
-}
-
-std::string Category::str() {
-    std::stringstream ss;
-    ss << json();
-    return ss.str();
-}
-
-nlohmann::json Category::json() {
-    nlohmann::json json;
-    for (auto& item : items) {
-        json[item.second.getIdent()] = item.second.json(); 
-    }
-    return json;
 }
