@@ -29,7 +29,7 @@ Category& Wallet::getCategory(const std::string& categoryIdentifier) {
         return categories.at(categoryIdentifier);
     } else {
         throw std::out_of_range(
-            "Unable to get category. Item with the identifier " 
+            "Unable to get category. Category with the identifier " 
                 + categoryIdentifier + " does not exist");
     }
 }

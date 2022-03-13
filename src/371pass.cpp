@@ -20,7 +20,13 @@ int App::run(int argc, char *argv[]) {
 
     // Gets the command line arguments
     auto options = App::cxxoptsSetup();
-    auto args = options.parse(argc, argv);
+	cxxopts::ParseResult args;
+	try {
+		args = options.parse(argc, argv);
+	} catch (cxxopts::OptionException& exception) {
+		std::cerr << exception.what() << "\n";
+		exit(1);
+	}
 
     // Print the help usage if requested
     if (args.count("help")) {
@@ -29,58 +35,65 @@ int App::run(int argc, char *argv[]) {
     }
 
     //Parses the command line arguments
-	std::string db = parseDatabaseArgument(args);
-    const Action a = parseActionArgument(args);
+	std::string database = parseDatabaseArgument(args);
+	Action action;
+	try {
+		action = parseActionArgument(args);
+	} catch (std::invalid_argument& exception) {
+		exit(1);
+	}
 	std::string categoryIdent = parseCategoryArgument(args);
+	std::string itemIdent = parseItemArgument(categoryIdent, args);
 
 	//Updates data based on the command line arguments
 	Wallet wObj{};
-    wObj.load(db);
-    switch (a) {
+    wObj.load(database);
+    switch (action) {
 		case Action::CREATE:
-			if (categoryIdent != "") {
+			if (itemIdent.compare("") != 0) {
+				createItem(wObj, categoryIdent, itemIdent);
+			} else if (categoryIdent.compare("") != 0) {
 				createCategory(wObj, categoryIdent);
 			} else {
-				std::fprintf(stderr, "Please provide arguments on what to "
-					"create in terms of category or item. Use -h or --help "
-					"for more information");
+				std::cerr << "Please provide arguments on what to create in "
+					"terms of category or item. Use -h or --help for more "
+					"information\n";
 				exit(1);
 			}
-			wObj.save(db);
+			wObj.save(database);
 			break;
 		case Action::READ:
-			if (categoryIdent != "") {
+			if (categoryIdent.compare("") != 0) {
 				readCategory(wObj, categoryIdent);
 			} else {
 				readWallet(wObj);
 			}
 			break;
 		case Action::UPDATE:
-			if (categoryIdent != "") {
+			if (categoryIdent.compare("") != 0) {
 				updateCategory(wObj, categoryIdent);
 			} else {
-				std::fprintf(stderr, "Please provide arguments on what to "
-					"update in terms of category or item. Use -h or --help "
-					"for more information");
+				std::cerr << "Please provide arguments on what to update in "
+					"terms of category or item. Use -h or --help for more "
+					"information\n";
 				exit(1);
 			}
-			wObj.save(db);
+			wObj.save(database);
 			break;
 		case Action::DELETE:
-			if (categoryIdent != "") {
+			if (categoryIdent.compare("") != 0) {
 				deleteCategory(wObj, categoryIdent);
 			} else {
-				std::fprintf(stderr, "Please provide arguments on what to "
-					"delete in terms of category or item. Use -h or --help "
-					"for more information");
+				std::cerr << "Please provide arguments on what to delete in "
+					"terms of category or item. Use -h or --help for more "
+					"information\n";
 				exit(1);
 			}
-			wObj.save(db);
+			wObj.save(database);
 			break;
 		default:
 			throw std::runtime_error("Unknown action not implemented");
     }
-	exit(0);
     return 0;
 
 }
@@ -95,21 +108,21 @@ cxxopts::Options App::cxxoptsSetup() {
 
 	"action",
 	"Action to take, can be: 'create', 'read', 'update', 'delete'.",
-	cxxopts::value<std::string>())(
+	cxxopts::value<std::string>()->default_value(""))(
 
 	"category",
 	"Apply action to a category (e.g., if you want to add a category, set "
 	"the"
 	" action argument to 'add' and the category argument to your chosen"
 	" category identifier).",
-	cxxopts::value<std::string>())(
+	cxxopts::value<std::string>()->default_value(""))(
 
 	"item",
 	"Apply action to an item (e.g., if you want to add an item, set the "
 	"action argument to 'add', the category argument to your chosen "
 	"category "
 	"identifier and the item argument to the item identifier).",
-	cxxopts::value<std::string>())(
+	cxxopts::value<std::string>()->default_value(""))(
 
 	"entry",
 	"Apply action to an entry (e.g., if you want to add an entry, set the "
@@ -122,7 +135,7 @@ cxxopts::Options App::cxxoptsSetup() {
 	"entry argument to the 'key'. If you are updating an entry key, use a "
 	": "
 	"e.g., oldkey:newkey,newvalue.",
-	cxxopts::value<std::string>())(
+	cxxopts::value<std::string>()->default_value(""))(
 
 	"h,help", "Print usage.");
 
@@ -132,63 +145,71 @@ cxxopts::Options App::cxxoptsSetup() {
 //Gets the database filename from the command line if one is given 
 //(database.json if not)
 std::string App::parseDatabaseArgument(cxxopts::ParseResult &args) {
-	try {
-		return args["database"].as<std::string>();
-    } catch (const cxxopts::option_not_present_exception&) {
-		return "database.json";
-    }
+	return args["db"].as<std::string>();
 }
 
 //Gets the action argument from the command line if one is given
 App::Action App::parseActionArgument(cxxopts::ParseResult &args) {
-	try {
-		Action a;
-		std::string input = args["action"].as<std::string>();
-		std::transform(input.begin(), input.end(), input.begin(), ::tolower);
-		if (input.compare("create") == 0) {
-			a = Action::CREATE;
-		} else if (input.compare("read") == 0) {
-			a = Action::READ;
-		} else if (input.compare("update") == 0) {
-			a = Action::UPDATE;
-		} else if (input.compare("delete") == 0) {
-			a = Action::DELETE;
-		} else {
-			std::fprintf(stderr, "Error: invalid action argument(s).\n");
-			throw std::invalid_argument("action");
-		}
-		return a;
-	} catch (const cxxopts::option_has_no_value_exception& ex) {
-		std::fprintf(stderr, "Error: missing action argument(s).\n");
+	Action a;
+	std::string input = args["action"].as<std::string>();
+	std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+	if (input.compare("create") == 0) {
+		a = Action::CREATE;
+	} else if (input.compare("read") == 0) {
+		a = Action::READ;
+	} else if (input.compare("update") == 0) {
+		a = Action::UPDATE;
+	} else if (input.compare("delete") == 0) {
+		a = Action::DELETE;
+	} else if (input.compare("") == 0) {
+		std::cerr << "Error: missing action argument(s).\n";
+		throw std::invalid_argument("action");
+	} else {
+		std::cerr << "Error: invalid action argument(s).\n";
 		throw std::invalid_argument("action");
 	}
+	return a;
 }
 
 //Gets the category argument from the command line if one is give
 std::string App::parseCategoryArgument(cxxopts::ParseResult &args) {
-	try {
-		return args["category"].as<std::string>();
-	} catch (const cxxopts::option_has_no_value_exception& ex) {
-		return "";
-	}
+	return args["category"].as<std::string>();
 }
 
-//Creates the category in the given wallet and with the given categoryIdentifier
+//Gets the item argument from the command line if one is give
+std::string App::parseItemArgument(std::string& categoryIdent, 
+	cxxopts::ParseResult &args) {
+	std::string item = args["item"].as<std::string>();
+	if (categoryIdent.compare("") == 0 && item.compare("") != 0) {
+		std::cerr << "Error: Unable to parse item argument. Needs category "
+			"argument that the item argument resides in.\n";
+		exit(1);
+	}
+	return item;
+}
+
+//Creates the category in the given wallet with the given categoryIdentifier
 void App::createCategory(Wallet& wObj, const std::string& categoryIdent) {
 	wObj.newCategory(categoryIdent);
 }
 
+//Creates the item in the given category with the given itemIdentifier
+void App::createItem(Wallet& wObj, const std::string& categoryIdent,
+    const std::string& itemIdent) {
+	wObj.newCategory(categoryIdent).newItem(itemIdent);
+}
+
 //Reads the given wallet
 void App::readWallet(Wallet& wObj) {
-	std::fprintf(stdout, "%s\n", getJSON(wObj).c_str());	
+	std::cout << getJSON(wObj) << "\n";
 }
 
 //Reads the category from the given wallet and categoryIdentifier
 void App::readCategory(Wallet& wObj, const std::string& categoryIdent) {
 	try {
-		std::fprintf(stdout, "%s\n", getJSON(wObj, categoryIdent).c_str());	
+		std::cout << getJSON(wObj, categoryIdent) << "\n";	
 	} catch (std::out_of_range& exception) {
-		std::fprintf(stderr, "%s\n", exception.what());
+		std::cerr << exception.what() << "\n";
 		exit(1);
 	}
 }
@@ -202,12 +223,12 @@ void App::updateCategory(Wallet& wObj, const std::string& categoryIdent) {
 			std::string newIdent = categoryIdent.substr(index + 1);
 			wObj.getCategory(oldIdent).setIdent(newIdent);
 		} else {
-			std::fprintf(stderr, "%s\n", "Category argument must be in the "
-				"format oldIdentifier:newIdentifier");
+			std::cerr << "Category argument must be in the format "
+				"oldIdentifier:newIdentifier\n";
 			exit(1);
 		}
 	} catch (std::invalid_argument& exception) {
-		std::fprintf(stderr, "%s\n", exception.what());
+		std::cerr << exception.what() << "\n";
 		exit(1);
 	}
 }
@@ -217,7 +238,7 @@ void App::deleteCategory(Wallet& wObj, const std::string& categoryIdent) {
 	try {
 		wObj.deleteCategory(categoryIdent);
 	} catch (std::out_of_range& exception) {
-		std::fprintf(stderr, "%s\n", exception.what());
+		std::cerr << exception.what() << "\n";
 		exit(1);
 	}
 }

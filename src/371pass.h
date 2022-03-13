@@ -39,9 +39,13 @@ namespace App {
     std::string parseDatabaseArgument(cxxopts::ParseResult &args);
     App::Action parseActionArgument(cxxopts::ParseResult &args);
     std::string parseCategoryArgument(cxxopts::ParseResult &args);
+    std::string parseItemArgument(std::string& categoryIdent, 
+        cxxopts::ParseResult &args);
 
     //Create Methods
-    void createCategory(Wallet& wObj, const std::string& categoryIdentifier);
+    void createCategory(Wallet& wObj, const std::string& categoryIdent);
+    void createItem(Wallet& wObj, const std::string& categoryIdent,
+        const std::string& itemIdent);
 
     //Read Methods
     void readWallet(Wallet& wObj);
