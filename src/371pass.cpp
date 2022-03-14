@@ -63,7 +63,9 @@ int App::run(int argc, char *argv[]) {
 			wObj.save(database);
 			break;
 		case Action::READ:
-			if (categoryIdent.compare("") != 0) {
+			if (itemIdent.compare("") != 0) {
+				readItem(wObj, categoryIdent, itemIdent);
+			} else if (categoryIdent.compare("") != 0) {
 				readCategory(wObj, categoryIdent);
 			} else {
 				readWallet(wObj);
@@ -204,10 +206,21 @@ void App::readWallet(Wallet& wObj) {
 	std::cout << getJSON(wObj) << "\n";
 }
 
-//Reads the category from the given wallet and categoryIdentifier
+//Reads the category from the given wallet and category identifier
 void App::readCategory(Wallet& wObj, const std::string& categoryIdent) {
 	try {
 		std::cout << getJSON(wObj, categoryIdent) << "\n";	
+	} catch (std::out_of_range& exception) {
+		std::cerr << exception.what() << "\n";
+		exit(1);
+	}
+}
+
+//Reads the item from the given category and item identifier
+void App::readItem(Wallet& wObj, const std::string& categoryIdent,
+	const std::string& itemIdent) {
+	try {
+		std::cout << getJSON(wObj, categoryIdent, itemIdent) << "\n";	
 	} catch (std::out_of_range& exception) {
 		std::cerr << exception.what() << "\n";
 		exit(1);

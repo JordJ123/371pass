@@ -50,6 +50,8 @@ namespace App {
     //Read Methods
     void readWallet(Wallet& wObj);
     void readCategory(Wallet& wObj, const std::string& categoryIdentifier);
+    void readItem(Wallet& wObj, const std::string& categoryIdent,
+        const std::string& itemIdent);
 
     //Update Methods
     void updateCategory(Wallet& wObj, const std::string& categoryIdent);
