@@ -43,20 +43,30 @@ namespace App {
         cxxopts::ParseResult &args);
 
     //Create Methods
+    void createAction(const std::string& database, Wallet& wObj, 
+        const std::string& categoryIdent, const std::string& itemIdent);
     void createCategory(Wallet& wObj, const std::string& categoryIdent);
     void createItem(Wallet& wObj, const std::string& categoryIdent,
         const std::string& itemIdent);
 
     //Read Methods
+    void readAction(Wallet& wObj, const std::string& categoryIdent,
+        const std::string& itemIdent);
     void readWallet(Wallet& wObj);
     void readCategory(Wallet& wObj, const std::string& categoryIdentifier);
     void readItem(Wallet& wObj, const std::string& categoryIdent,
         const std::string& itemIdent);
 
     //Update Methods
+    void updateAction(const std::string& database, Wallet& wObj, 
+        const std::string& categoryIdent, const std::string& itemIdent);
     void updateCategory(Wallet& wObj, const std::string& categoryIdent);
+    void updateItem(Wallet& wObj, const std::string& categoryIdent,
+        const std::string& itemIdent);
 
     //Delete Methods
+    void deleteAction(const std::string& database, Wallet& wObj, 
+        const std::string& categoryIdent, const std::string& itemIdent);
     void deleteCategory(Wallet& wObj, const std::string& categoryIdent);
 
     //Gets JSON Methods

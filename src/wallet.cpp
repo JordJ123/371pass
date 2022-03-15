@@ -28,9 +28,8 @@ Category& Wallet::getCategory(const std::string& categoryIdentifier) {
     if (categories.count(categoryIdentifier) == 1) {
         return categories.at(categoryIdentifier);
     } else {
-        throw std::out_of_range(
-            "Unable to get category. Category with the identifier " 
-                + categoryIdentifier + " does not exist");
+        throw std::out_of_range("Error: Unable to get category. Category with "
+            "the identifier " + categoryIdentifier + " does not exist.");
     }
 }
 
@@ -39,7 +38,8 @@ void Wallet::load(const std::string& filename) {
     std::ifstream databaseFile;
     databaseFile.open(filename);
     if (!databaseFile.is_open()) {
-        std::cerr << filename << " could not be open or does not exist\n";
+        std::cerr << "Error: " << filename << " could not be open or does not "
+            << "exist.\n";
         std::exit(1);
     }
     nlohmann::json walletJSON = nlohmann::json::parse(databaseFile);
@@ -56,7 +56,8 @@ void Wallet::save(const std::string& filename) {
     std::ofstream databaseFile;
     databaseFile.open(filename);
     if (!databaseFile.is_open()) {
-        std::cerr << filename << " could not be open or does not exist\n";
+        std::cerr << "Error: " << filename << " could not be open or does not "
+            << "exist.\n";
         std::exit(1);
     }
     databaseFile << json().dump();
@@ -70,8 +71,8 @@ Category& Wallet::newCategory(const std::string& categoryIdentifier) {
         try {
             addCategory(category);
         } catch(const std::exception& ex) {
-            throw std::runtime_error("Unable to add category with identifer "
-                + category.getIdent());
+            throw std::runtime_error("Error: Unable to add category with "
+                "identifer " + category.getIdent() + ".");
         }
     } 
     return categories.at(categoryIdentifier);
@@ -83,8 +84,8 @@ bool Wallet::addCategory(Category& category) {
         try {
             categories.emplace(category.getIdent(), category);
         } catch(const std::exception& ex) {
-            throw std::runtime_error("Unable to add category with identifer "
-                + category.getIdent());
+            throw std::runtime_error("Error: Unable to add category with "
+                "identifer " + category.getIdent() + ".");
         }
         return true;
     } else {
@@ -101,9 +102,8 @@ bool Wallet::deleteCategory(const std::string& categoryIdentifier) {
     if (categories.count(categoryIdentifier) == 1) {
         return categories.erase(categoryIdentifier);
     } else {
-        throw std::out_of_range(
-            "Unable to delete category. Category with the identifier " 
-                + categoryIdentifier + " does not exist");
+        throw std::out_of_range("Error: Unable to delete category. Category "
+            "with the identifier " + categoryIdentifier + " does not exist.");
     }
 }
 

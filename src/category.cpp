@@ -39,9 +39,8 @@ Item& Category::getItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) == 1) {
         return items.at(itemIdentifier);
     } else {
-        throw std::out_of_range(
-            "Unable to get item. Item with the identifier " + itemIdentifier 
-                + " does not exist");
+        throw std::out_of_range("Error: Unable to get item. Item with the "
+            "identifier " + itemIdentifier + " does not exist.");
     }
 }
 
@@ -61,8 +60,8 @@ Item& Category::newItem(const std::string& itemIdentifier) {
         try {
             addItem(item);
         } catch(const std::exception& ex) {
-            throw std::runtime_error("Unable to add item with identifer "
-                + item.getIdent());
+            throw std::runtime_error("Error: Unable to add item with identifer "
+                + item.getIdent() + ".");
         }
     } 
     return items.at(itemIdentifier);
@@ -74,8 +73,8 @@ bool Category::addItem(Item& item) {
         try {
             items.emplace(item.getIdent(), item);
         } catch(const std::exception& ex) {
-            throw std::runtime_error("Unable to add item with identifer "
-                + item.getIdent());
+            throw std::runtime_error("Error: Unable to add item with identifer "
+                + item.getIdent() + ".");
         }
         return true;
     } else {
@@ -92,9 +91,8 @@ bool Category::deleteItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) == 1) {
         return items.erase(itemIdentifier);
     } else {
-        throw std::out_of_range(
-            "Unable to delete item. Item with the identifier " + itemIdentifier 
-                + " does not exist");
+        throw std::out_of_range("Error: Unable to delete item. Item with the "
+            "identifier " + itemIdentifier + " does not exist.");
     }
 }
 

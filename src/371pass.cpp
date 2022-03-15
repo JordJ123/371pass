@@ -50,48 +50,16 @@ int App::run(int argc, char *argv[]) {
     wObj.load(database);
     switch (action) {
 		case Action::CREATE:
-			if (itemIdent.compare("") != 0) {
-				createItem(wObj, categoryIdent, itemIdent);
-			} else if (categoryIdent.compare("") != 0) {
-				createCategory(wObj, categoryIdent);
-			} else {
-				std::cerr << "Please provide arguments on what to create in "
-					"terms of category or item. Use -h or --help for more "
-					"information\n";
-				exit(1);
-			}
-			wObj.save(database);
+			createAction(database, wObj, categoryIdent, itemIdent);
 			break;
 		case Action::READ:
-			if (itemIdent.compare("") != 0) {
-				readItem(wObj, categoryIdent, itemIdent);
-			} else if (categoryIdent.compare("") != 0) {
-				readCategory(wObj, categoryIdent);
-			} else {
-				readWallet(wObj);
-			}
+			readAction(wObj, categoryIdent, itemIdent);
 			break;
 		case Action::UPDATE:
-			if (categoryIdent.compare("") != 0) {
-				updateCategory(wObj, categoryIdent);
-			} else {
-				std::cerr << "Please provide arguments on what to update in "
-					"terms of category or item. Use -h or --help for more "
-					"information\n";
-				exit(1);
-			}
-			wObj.save(database);
+			updateAction(database, wObj, categoryIdent, itemIdent);
 			break;
 		case Action::DELETE:
-			if (categoryIdent.compare("") != 0) {
-				deleteCategory(wObj, categoryIdent);
-			} else {
-				std::cerr << "Please provide arguments on what to delete in "
-					"terms of category or item. Use -h or --help for more "
-					"information\n";
-				exit(1);
-			}
-			wObj.save(database);
+			deleteAction(database, wObj, categoryIdent, itemIdent);
 			break;
 		default:
 			throw std::runtime_error("Unknown action not implemented");
@@ -190,6 +158,22 @@ std::string App::parseItemArgument(std::string& categoryIdent,
 	return item;
 }
 
+//Performs the create action
+void App::createAction(const std::string& database, Wallet& wObj, 
+        const std::string& categoryIdent, const std::string& itemIdent) {
+	if (itemIdent.compare("") != 0) {
+		createItem(wObj, categoryIdent, itemIdent);
+	} else if (categoryIdent.compare("") != 0) {
+		createCategory(wObj, categoryIdent);
+	} else {
+		std::cerr << "Error: Please provide arguments on what to create"
+			" in terms of category or item. Use -h or --help for more "
+			"information.\n";
+		exit(1);
+	}
+	wObj.save(database);
+}
+
 //Creates the category in the given wallet with the given categoryIdentifier
 void App::createCategory(Wallet& wObj, const std::string& categoryIdent) {
 	wObj.newCategory(categoryIdent);
@@ -199,6 +183,18 @@ void App::createCategory(Wallet& wObj, const std::string& categoryIdent) {
 void App::createItem(Wallet& wObj, const std::string& categoryIdent,
     const std::string& itemIdent) {
 	wObj.newCategory(categoryIdent).newItem(itemIdent);
+}
+
+//Performs the read action
+void App::readAction(Wallet& wObj, const std::string& categoryIdent,
+    const std::string& itemIdent) {
+	if (itemIdent.compare("") != 0) {
+		readItem(wObj, categoryIdent, itemIdent);
+	} else if (categoryIdent.compare("") != 0) {
+		readCategory(wObj, categoryIdent);
+	} else {
+		readWallet(wObj);
+	}
 }
 
 //Reads the given wallet
@@ -227,6 +223,22 @@ void App::readItem(Wallet& wObj, const std::string& categoryIdent,
 	}
 }
 
+//Performs the update action
+void App::updateAction(const std::string& database, Wallet& wObj, 
+        const std::string& categoryIdent, const std::string& itemIdent) {
+	if (itemIdent.compare("") != 0) {
+		updateItem(wObj, categoryIdent, itemIdent);
+	} else if (categoryIdent.compare("") != 0) {
+		updateCategory(wObj, categoryIdent);
+	} else {
+		std::cerr << "Error: Please provide arguments on what to update"
+			" in terms of category or item. Use -h or --help for more "
+			"information.\n";
+		exit(1);
+	}
+	wObj.save(database);
+}
+
 //Updates the category name from the given wallet and category identifiers
 void App::updateCategory(Wallet& wObj, const std::string& categoryIdent) {
 	try {
@@ -236,14 +248,49 @@ void App::updateCategory(Wallet& wObj, const std::string& categoryIdent) {
 			std::string newIdent = categoryIdent.substr(index + 1);
 			wObj.getCategory(oldIdent).setIdent(newIdent);
 		} else {
-			std::cerr << "Category argument must be in the format "
-				"oldIdentifier:newIdentifier\n";
+			std::cerr << "Error: Category argument must be in the format "
+				"oldIdentifier:newIdentifier.\n";
 			exit(1);
 		}
-	} catch (std::invalid_argument& exception) {
+	} catch (std::out_of_range& exception) {
 		std::cerr << exception.what() << "\n";
 		exit(1);
 	}
+}
+
+//Updates the item name from the given category and item identifiers
+void App::updateItem(Wallet& wObj, const std::string& categoryIdent, 
+	const std::string& itemIdent) {
+	try {
+		int index = itemIdent.find(":");
+		if (index != -1 && index == (int) itemIdent.find_last_of(":")) {
+			std::string oldIdent = itemIdent.substr(0, index);
+			std::string newIdent = itemIdent.substr(index + 1);
+			wObj.getCategory(categoryIdent).getItem(oldIdent)
+				.setIdent(newIdent);
+		} else {
+			std::cerr << "Error: Item argument must be in the format "
+				"oldIdentifier:newIdentifier.\n";
+			exit(1);
+		}
+	} catch (std::out_of_range& exception) {
+		std::cerr << exception.what() << "\n";
+		exit(1);
+	}
+}
+
+//Performs the delete action
+void App::deleteAction(const std::string& database, Wallet& wObj, 
+        const std::string& categoryIdent, const std::string& itemIdent) {
+	if (categoryIdent.compare("") != 0) {
+		deleteCategory(wObj, categoryIdent);
+	} else {
+		std::cerr << "Error: Please provide arguments on what to delete"
+			" in terms of category or item. Use -h or --help for more "
+			"information.\n";
+		exit(1);
+	}
+	wObj.save(database);
 }
 
 //Deletes the category based on the given wallet and category identifier

@@ -40,8 +40,8 @@ std::string& Item::getEntry(const std::string& key) {
     if (entries.count(key) == 1) {
         return entries.at(key);
     } else {
-        throw std::out_of_range("Unable to get entry. Entry with the key " 
-            + key + " does not exist");
+        throw std::out_of_range("Error: Unable to get entry. Entry with the key" 
+            " " + key + " does not exist.");
     }
 }
 
@@ -73,8 +73,8 @@ bool Item::deleteEntry(std::string& key) {
         entries.erase(key);
         return true;
     } else {
-        throw std::out_of_range("Unable to delete entry. Entry with the key " 
-            + key + " does not exist");
+        throw std::out_of_range("Error: Unable to delete entry. Entry with the "
+            "key " + key + " does not exist.");
         return false;
     }
 }
