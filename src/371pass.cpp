@@ -282,7 +282,9 @@ void App::updateItem(Wallet& wObj, const std::string& categoryIdent,
 //Performs the delete action
 void App::deleteAction(const std::string& database, Wallet& wObj, 
         const std::string& categoryIdent, const std::string& itemIdent) {
-	if (categoryIdent.compare("") != 0) {
+	if (itemIdent.compare("") != 0) {
+		deleteItem(wObj, categoryIdent, itemIdent);
+	} else if (categoryIdent.compare("") != 0) {
 		deleteCategory(wObj, categoryIdent);
 	} else {
 		std::cerr << "Error: Please provide arguments on what to delete"
@@ -297,6 +299,17 @@ void App::deleteAction(const std::string& database, Wallet& wObj,
 void App::deleteCategory(Wallet& wObj, const std::string& categoryIdent) {
 	try {
 		wObj.deleteCategory(categoryIdent);
+	} catch (std::out_of_range& exception) {
+		std::cerr << exception.what() << "\n";
+		exit(1);
+	}
+}
+
+//Deletes the item based on the given category and item identifier
+void App::deleteItem(Wallet& wObj, const std::string& categoryIdent, 
+	const std::string& itemIdent) {
+	try {
+		wObj.getCategory(categoryIdent).deleteItem(itemIdent);
 	} catch (std::out_of_range& exception) {
 		std::cerr << exception.what() << "\n";
 		exit(1);

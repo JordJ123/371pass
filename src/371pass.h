@@ -68,6 +68,8 @@ namespace App {
     void deleteAction(const std::string& database, Wallet& wObj, 
         const std::string& categoryIdent, const std::string& itemIdent);
     void deleteCategory(Wallet& wObj, const std::string& categoryIdent);
+    void deleteItem(Wallet& wObj, const std::string& categoryIdent,
+        const std::string& itemIdent);
 
     //Gets JSON Methods
     std::string getJSON(Wallet &w);
