@@ -166,9 +166,7 @@ void App::createAction(const std::string& database, Wallet& wObj,
 	} else if (categoryIdent.compare("") != 0) {
 		createCategory(wObj, categoryIdent);
 	} else {
-		std::cerr << "Error: Please provide arguments on what to create"
-			" in terms of category or item. Use -h or --help for more "
-			"information.\n";
+		std::cerr << "Error: missing category, item or entry argument(s).\n";
 		exit(1);
 	}
 	wObj.save(database);
@@ -231,9 +229,7 @@ void App::updateAction(const std::string& database, Wallet& wObj,
 	} else if (categoryIdent.compare("") != 0) {
 		updateCategory(wObj, categoryIdent);
 	} else {
-		std::cerr << "Error: Please provide arguments on what to update"
-			" in terms of category or item. Use -h or --help for more "
-			"information.\n";
+		std::cerr << "Error: missing category, item or entry argument(s).\n";
 		exit(1);
 	}
 	wObj.save(database);
@@ -287,9 +283,7 @@ void App::deleteAction(const std::string& database, Wallet& wObj,
 	} else if (categoryIdent.compare("") != 0) {
 		deleteCategory(wObj, categoryIdent);
 	} else {
-		std::cerr << "Error: Please provide arguments on what to delete"
-			" in terms of category or item. Use -h or --help for more "
-			"information.\n";
+		std::cerr << "Error: missing category, item or entry argument(s).\n";
 		exit(1);
 	}
 	wObj.save(database);
