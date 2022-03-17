@@ -58,24 +58,22 @@ void Item::load(nlohmann::json::iterator& item) {
 
 //Creates a new entry with the given key and value and adds it to the item
 bool Item::addEntry(const std::string& key, const std::string& value) {
-    if (entries.count(key) != 1) {
-        entries.emplace(key, value);
-        return true;
-    } else {
-        entries.emplace(key, value);
-        return false;
+    bool newEntry = entries.count(key) != 1;
+    if (!newEntry) {
+        deleteEntry(key);
     }
+    entries.emplace(key, value);
+    return newEntry;
 }
 
 //Deletes the entry with the given key from the item
-bool Item::deleteEntry(std::string& key) {
+bool Item::deleteEntry(const std::string& key) {
     if (entries.count(key) == 1) {
         entries.erase(key);
         return true;
     } else {
         throw std::out_of_range("Error: Unable to delete entry. Entry with the "
             "key " + key + " does not exist.");
-        return false;
     }
 }
 

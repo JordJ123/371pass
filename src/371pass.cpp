@@ -44,13 +44,14 @@ int App::run(int argc, char *argv[]) {
 	}
 	std::string categoryIdent = parseCategoryArgument(args);
 	std::string itemIdent = parseItemArgument(categoryIdent, args);
+	std::string entry = parseEntryArgument(itemIdent, args);
 
 	//Updates data based on the command line arguments
 	Wallet wObj{};
     wObj.load(database);
     switch (action) {
 		case Action::CREATE:
-			createAction(database, wObj, categoryIdent, itemIdent);
+			createAction(database, wObj, categoryIdent, itemIdent, entry);
 			break;
 		case Action::READ:
 			readAction(wObj, categoryIdent, itemIdent);
@@ -114,12 +115,12 @@ cxxopts::Options App::cxxoptsSetup() {
 
 //Gets the database filename from the command line if one is given 
 //(database.json if not)
-std::string App::parseDatabaseArgument(cxxopts::ParseResult &args) {
+std::string App::parseDatabaseArgument(cxxopts::ParseResult& args) {
 	return args["db"].as<std::string>();
 }
 
 //Gets the action argument from the command line if one is given
-App::Action App::parseActionArgument(cxxopts::ParseResult &args) {
+App::Action App::parseActionArgument(cxxopts::ParseResult& args) {
 	Action a;
 	std::string input = args["action"].as<std::string>();
 	std::transform(input.begin(), input.end(), input.begin(), ::tolower);
@@ -142,13 +143,13 @@ App::Action App::parseActionArgument(cxxopts::ParseResult &args) {
 }
 
 //Gets the category argument from the command line if one is give
-std::string App::parseCategoryArgument(cxxopts::ParseResult &args) {
+std::string App::parseCategoryArgument(cxxopts::ParseResult& args) {
 	return args["category"].as<std::string>();
 }
 
 //Gets the item argument from the command line if one is give
 std::string App::parseItemArgument(std::string& categoryIdent, 
-	cxxopts::ParseResult &args) {
+	cxxopts::ParseResult& args) {
 	std::string item = args["item"].as<std::string>();
 	if (categoryIdent.compare("") == 0 && item.compare("") != 0) {
 		std::cerr << "Error: Unable to parse item argument. Needs category "
@@ -158,16 +159,33 @@ std::string App::parseItemArgument(std::string& categoryIdent,
 	return item;
 }
 
+//Gets the entry argument from the command line if one is give
+std::string App::parseEntryArgument(std::string& itemIdent, 
+	cxxopts::ParseResult& args) {
+	std::string item = args["entry"].as<std::string>();
+	if (itemIdent.compare("") == 0 && item.compare("") != 0) {
+		std::cerr << "Error: Unable to parse entry argument. Needs item "
+			"argument that the entry argument resides in.\n";
+		exit(1);
+	}
+	return item;
+}
+
 //Performs the create action
 void App::createAction(const std::string& database, Wallet& wObj, 
-        const std::string& categoryIdent, const std::string& itemIdent) {
-	if (itemIdent.compare("") != 0) {
-		createItem(wObj, categoryIdent, itemIdent);
-	} else if (categoryIdent.compare("") != 0) {
+        const std::string& categoryIdent, const std::string& itemIdent,
+		const std::string& entry) {
+	if (categoryIdent.compare("") != 0) {
 		createCategory(wObj, categoryIdent);
 	} else {
 		std::cerr << "Error: missing category, item or entry argument(s).\n";
 		exit(1);
+	}
+	if (itemIdent.compare("") != 0) {
+		createItem(wObj, categoryIdent, itemIdent);
+	}
+	if (entry.compare("") != 0) {
+		createEntry(wObj, categoryIdent, itemIdent, entry);
 	}
 	wObj.save(database);
 }
@@ -181,6 +199,22 @@ void App::createCategory(Wallet& wObj, const std::string& categoryIdent) {
 void App::createItem(Wallet& wObj, const std::string& categoryIdent,
     const std::string& itemIdent) {
 	wObj.newCategory(categoryIdent).newItem(itemIdent);
+}
+
+//Creates the entry in the given item with the given entry details
+void App::createEntry(Wallet& wObj, const std::string& categoryIdent,
+    const std::string& itemIdent, const std::string& entry) {
+	std::string key;
+	std::string value;
+	int index = entry.find(",");
+	if (index != -1) {
+		key = entry.substr(0, index);
+		value = entry.substr(index + 1);
+	} else {
+		key = entry;
+		value = "";
+	}
+	wObj.getCategory(categoryIdent).getItem(itemIdent).addEntry(key, value);
 }
 
 //Performs the read action

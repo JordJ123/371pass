@@ -44,7 +44,7 @@ class Item {
     public:
         void load(nlohmann::json::iterator& item);
         bool addEntry(const std::string& key, const std::string& value);
-        bool deleteEntry(std::string& key);
+        bool deleteEntry(const std::string& key);
         unsigned int size();
         bool empty();
         std::string str();
