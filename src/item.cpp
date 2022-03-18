@@ -40,7 +40,7 @@ std::string& Item::getEntry(const std::string& key) {
     if (entries.count(key) == 1) {
         return entries.at(key);
     } else {
-        throw std::out_of_range("Error: invalid item arguments(s).");
+        throw std::out_of_range("Error: invalid entry argument(s).");
     }
 }
 
@@ -71,7 +71,7 @@ bool Item::deleteEntry(const std::string& key) {
         entries.erase(key);
         return true;
     } else {
-        throw std::out_of_range("Error: invalid entry arguments(s).");
+        throw std::out_of_range("Error: invalid entry argument(s).");
     }
 }
 

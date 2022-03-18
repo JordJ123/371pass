@@ -28,7 +28,7 @@ Category& Wallet::getCategory(const std::string& categoryIdentifier) {
     if (categories.count(categoryIdentifier) == 1) {
         return categories.at(categoryIdentifier);
     } else {
-        throw std::out_of_range("Error: invalid category arguments(s).");
+        throw std::out_of_range("Error: invalid category argument(s).");
     }
 }
 
@@ -101,7 +101,7 @@ bool Wallet::deleteCategory(const std::string& categoryIdentifier) {
     if (categories.count(categoryIdentifier) == 1) {
         return categories.erase(categoryIdentifier);
     } else {
-        throw std::out_of_range("Error: invalid category arguments(s).");
+        throw std::out_of_range("Error: invalid category argument(s).");
     }
 }
 

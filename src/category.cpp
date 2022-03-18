@@ -39,7 +39,7 @@ Item& Category::getItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) == 1) {
         return items.at(itemIdentifier);
     } else {
-        throw std::out_of_range("Error: invalid item arguments(s).");
+        throw std::out_of_range("Error: invalid item argument(s).");
     }
 }
 
@@ -90,7 +90,7 @@ bool Category::deleteItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) == 1) {
         return items.erase(itemIdentifier);
     } else {
-        throw std::out_of_range("Error: invalid item arguments(s).");
+        throw std::out_of_range("Error: invalid item argument(s).");
     }
 }
 
