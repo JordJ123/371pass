@@ -39,10 +39,10 @@ namespace App {
     std::string parseDatabaseArgument(cxxopts::ParseResult& args);
     App::Action parseActionArgument(cxxopts::ParseResult& args);
     std::string parseCategoryArgument(cxxopts::ParseResult& args);
-    std::string parseItemArgument(std::string& categoryIdent, 
+    std::string parseItemArgument(const std::string& categoryIdent, 
         cxxopts::ParseResult& args);
-    std::string parseEntryArgument(std::string& itemIdent, 
-        cxxopts::ParseResult& args);
+    std::string parseEntryArgument(const std::string& categoryIdent, 
+        const std::string& itemIdent, cxxopts::ParseResult& args);
 
     //Create Methods
     void createAction(const std::string& database, Wallet& wObj, 
@@ -56,11 +56,13 @@ namespace App {
 
     //Read Methods
     void readAction(Wallet& wObj, const std::string& categoryIdent,
-        const std::string& itemIdent);
+        const std::string& itemIdent, const std::string& entry);
     void readWallet(Wallet& wObj);
     void readCategory(Wallet& wObj, const std::string& categoryIdentifier);
     void readItem(Wallet& wObj, const std::string& categoryIdent,
         const std::string& itemIdent);
+    void readEntry(Wallet& wObj, const std::string& categoryIdent,
+        const std::string& itemIdent, const std::string& entry);
 
     //Update Methods
     void updateAction(const std::string& database, Wallet& wObj, 

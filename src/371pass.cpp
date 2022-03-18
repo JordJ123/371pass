@@ -44,7 +44,7 @@ int App::run(int argc, char *argv[]) {
 	}
 	std::string categoryIdent = parseCategoryArgument(args);
 	std::string itemIdent = parseItemArgument(categoryIdent, args);
-	std::string entry = parseEntryArgument(itemIdent, args);
+	std::string entry = parseEntryArgument(categoryIdent, itemIdent, args);
 
 	//Updates data based on the command line arguments
 	Wallet wObj{};
@@ -54,7 +54,7 @@ int App::run(int argc, char *argv[]) {
 			createAction(database, wObj, categoryIdent, itemIdent, entry);
 			break;
 		case Action::READ:
-			readAction(wObj, categoryIdent, itemIdent);
+			readAction(wObj, categoryIdent, itemIdent, entry);
 			break;
 		case Action::UPDATE:
 			updateAction(database, wObj, categoryIdent, itemIdent);
@@ -148,27 +148,31 @@ std::string App::parseCategoryArgument(cxxopts::ParseResult& args) {
 }
 
 //Gets the item argument from the command line if one is give
-std::string App::parseItemArgument(std::string& categoryIdent, 
+std::string App::parseItemArgument(const std::string& categoryIdent, 
 	cxxopts::ParseResult& args) {
 	std::string item = args["item"].as<std::string>();
 	if (categoryIdent.compare("") == 0 && item.compare("") != 0) {
-		std::cerr << "Error: Unable to parse item argument. Needs category "
-			"argument that the item argument resides in.\n";
+		std::cerr << "Error: missing category argument(s).\n";
 		exit(1);
 	}
 	return item;
 }
 
 //Gets the entry argument from the command line if one is give
-std::string App::parseEntryArgument(std::string& itemIdent, 
-	cxxopts::ParseResult& args) {
-	std::string item = args["entry"].as<std::string>();
-	if (itemIdent.compare("") == 0 && item.compare("") != 0) {
-		std::cerr << "Error: Unable to parse entry argument. Needs item "
-			"argument that the entry argument resides in.\n";
-		exit(1);
+std::string App::parseEntryArgument(const std::string& categoryIdent, 
+        const std::string& itemIdent, cxxopts::ParseResult& args) {
+	std::string entry = args["entry"].as<std::string>();
+	if (entry.compare("") != 0) {
+		if (categoryIdent.compare("") == 0) {
+			std::cerr <<  "Error: missing category argument(s).\n";
+			exit(1);
+		}
+		if (itemIdent.compare("") == 0) {
+			std::cerr <<  "Error: missing item argument(s).\n";
+			exit(1);
+		}
 	}
-	return item;
+	return entry;
 }
 
 //Performs the create action
@@ -219,8 +223,10 @@ void App::createEntry(Wallet& wObj, const std::string& categoryIdent,
 
 //Performs the read action
 void App::readAction(Wallet& wObj, const std::string& categoryIdent,
-    const std::string& itemIdent) {
-	if (itemIdent.compare("") != 0) {
+    const std::string& itemIdent, const std::string& entry) {
+	if (entry.compare("") != 0) {
+		readEntry(wObj, categoryIdent, itemIdent, entry);
+	} else if (itemIdent.compare("") != 0) {
 		readItem(wObj, categoryIdent, itemIdent);
 	} else if (categoryIdent.compare("") != 0) {
 		readCategory(wObj, categoryIdent);
@@ -249,6 +255,17 @@ void App::readItem(Wallet& wObj, const std::string& categoryIdent,
 	const std::string& itemIdent) {
 	try {
 		std::cout << getJSON(wObj, categoryIdent, itemIdent) << "\n";	
+	} catch (std::out_of_range& exception) {
+		std::cerr << exception.what() << "\n";
+		exit(1);
+	}
+}
+
+//Reads the entry from the given item and entry key
+void App::readEntry(Wallet& wObj, const std::string& categoryIdent,
+    const std::string& itemIdent, const std::string& entry) {
+	try {
+		std::cout << getJSON(wObj, categoryIdent, itemIdent, entry) << "\n";	
 	} catch (std::out_of_range& exception) {
 		std::cerr << exception.what() << "\n";
 		exit(1);

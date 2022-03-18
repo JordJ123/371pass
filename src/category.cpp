@@ -39,8 +39,7 @@ Item& Category::getItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) == 1) {
         return items.at(itemIdentifier);
     } else {
-        throw std::out_of_range("Error: Unable to get item. Item with the "
-            "identifier " + itemIdentifier + " does not exist.");
+        throw std::out_of_range("Error: invalid item arguments(s).");
     }
 }
 
@@ -91,8 +90,7 @@ bool Category::deleteItem(const std::string& itemIdentifier) {
     if (items.count(itemIdentifier) == 1) {
         return items.erase(itemIdentifier);
     } else {
-        throw std::out_of_range("Error: Unable to delete item. Item with the "
-            "identifier " + itemIdentifier + " does not exist.");
+        throw std::out_of_range("Error: invalid item arguments(s).");
     }
 }
 
