@@ -57,7 +57,7 @@ int App::run(int argc, char *argv[]) {
 			readAction(wObj, categoryIdent, itemIdent, entry);
 			break;
 		case Action::UPDATE:
-			updateAction(database, wObj, categoryIdent, itemIdent);
+			updateAction(database, wObj, categoryIdent, itemIdent, entry);
 			break;
 		case Action::DELETE:
 			deleteAction(database, wObj, categoryIdent, itemIdent);
@@ -274,8 +274,11 @@ void App::readEntry(Wallet& wObj, const std::string& categoryIdent,
 
 //Performs the update action
 void App::updateAction(const std::string& database, Wallet& wObj, 
-        const std::string& categoryIdent, const std::string& itemIdent) {
-	if (itemIdent.compare("") != 0) {
+        const std::string& categoryIdent, const std::string& itemIdent,
+		const std::string& entry) {
+	if (entry.compare("") != 0) {
+		updateEntry(wObj, categoryIdent, itemIdent, entry);
+	} else if (itemIdent.compare("") != 0) {
 		updateItem(wObj, categoryIdent, itemIdent);
 	} else if (categoryIdent.compare("") != 0) {
 		updateCategory(wObj, categoryIdent);
@@ -295,7 +298,7 @@ void App::updateCategory(Wallet& wObj, const std::string& categoryIdent) {
 			std::string newIdent = categoryIdent.substr(index + 1);
 			wObj.getCategory(oldIdent).setIdent(newIdent);
 		} else {
-			std::cerr << "Error: Category argument must be in the format "
+			std::cerr << "Error: category argument must be in the format "
 				"oldIdentifier:newIdentifier.\n";
 			exit(1);
 		}
@@ -316,10 +319,63 @@ void App::updateItem(Wallet& wObj, const std::string& categoryIdent,
 			wObj.getCategory(categoryIdent).getItem(oldIdent)
 				.setIdent(newIdent);
 		} else {
-			std::cerr << "Error: Item argument must be in the format "
+			std::cerr << "Error: item argument must be in the format "
 				"oldIdentifier:newIdentifier.\n";
 			exit(1);
 		}
+	} catch (std::out_of_range& exception) {
+		std::cerr << exception.what() << "\n";
+		exit(1);
+	}
+}
+
+//Updates the entry name from the given item and entry names
+void App::updateEntry(Wallet& wObj, const std::string& categoryIdent,
+	const std::string& itemIdent, const std::string& entry) {
+	try {
+
+		//Gets the index of the delimiters
+		int indexColon = entry.find(":");
+		int indexComma = entry.find(",");
+
+		//Updates the key and value if the format is correct
+		if (indexColon != -1 && indexColon == (int) entry.find_last_of(":") 
+			&& indexComma != -1 
+			&& indexComma == (int) entry.find_last_of(",")) {
+			std::string oldKey = entry.substr(0, indexColon);
+			std::string newKey = entry.substr(indexColon + 1, 
+				indexComma - indexColon - 1);
+			std::cout << newKey << " " << indexComma << "\n";
+			std::string newValue = entry.substr(indexComma + 1);
+			wObj.getCategory(categoryIdent).getItem(itemIdent)
+				.updateEntry(oldKey, newKey, newValue);
+			return;
+		}
+
+		//Updates the key if the format is correct
+		if (indexColon != -1 && indexColon == (int) entry.find_last_of(":")) {
+			std::string oldKey = entry.substr(0, indexColon);
+			std::string newKey = entry.substr(indexColon + 1);
+			wObj.getCategory(categoryIdent).getItem(itemIdent)
+				.updateEntryKey(oldKey, newKey);
+			return;
+		}
+
+		//Updates the value if the format is correct
+		if (indexComma != -1 && indexComma 
+			== (int) entry.find_last_of(",")) {
+			std::string key = entry.substr(0, indexComma);
+			std::string newValue = entry.substr(indexComma + 1);
+			wObj.getCategory(categoryIdent).getItem(itemIdent)
+				.updateEntryValue(key, newValue);
+			return;
+		}
+
+		//Prints error if none of the formats are correct
+		std::cerr << "Error: entry argument must be in the format "
+			"oldKey:newKey,newValue, oldKey:newKey or key,newValue.\n";
+		exit(1);
+
 	} catch (std::out_of_range& exception) {
 		std::cerr << exception.what() << "\n";
 		exit(1);

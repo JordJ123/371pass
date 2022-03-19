@@ -59,7 +59,7 @@ Item& Category::newItem(const std::string& itemIdentifier) {
         try {
             addItem(item);
         } catch(const std::exception& ex) {
-            throw std::runtime_error("Error: Unable to add item with identifer "
+            throw std::runtime_error("Error: unable to add item with identifer "
                 + item.getIdent() + ".");
         }
     } 
@@ -72,7 +72,7 @@ bool Category::addItem(Item& item) {
         try {
             items.emplace(item.getIdent(), item);
         } catch(const std::exception& ex) {
-            throw std::runtime_error("Error: Unable to add item with identifer "
+            throw std::runtime_error("Error: unable to add item with identifer "
                 + item.getIdent() + ".");
         }
         return true;

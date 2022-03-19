@@ -66,10 +66,13 @@ namespace App {
 
     //Update Methods
     void updateAction(const std::string& database, Wallet& wObj, 
-        const std::string& categoryIdent, const std::string& itemIdent);
+        const std::string& categoryIdent, const std::string& itemIdent, 
+        const std::string& entry);
     void updateCategory(Wallet& wObj, const std::string& categoryIdent);
     void updateItem(Wallet& wObj, const std::string& categoryIdent,
         const std::string& itemIdent);
+    void updateEntry(Wallet& wObj, const std::string& categoryIdent,
+        const std::string& itemIdent, const std::string& entry);
 
     //Delete Methods
     void deleteAction(const std::string& database, Wallet& wObj, 

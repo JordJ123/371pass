@@ -70,7 +70,7 @@ Category& Wallet::newCategory(const std::string& categoryIdentifier) {
         try {
             addCategory(category);
         } catch(const std::exception& ex) {
-            throw std::runtime_error("Error: Unable to add category with "
+            throw std::runtime_error("Error: unable to add category with "
                 "identifer " + category.getIdent() + ".");
         }
     } 
@@ -83,7 +83,7 @@ bool Wallet::addCategory(Category& category) {
         try {
             categories.emplace(category.getIdent(), category);
         } catch(const std::exception& ex) {
-            throw std::runtime_error("Error: Unable to add category with "
+            throw std::runtime_error("Error: unable to add category with "
                 "identifer " + category.getIdent() + ".");
         }
         return true;

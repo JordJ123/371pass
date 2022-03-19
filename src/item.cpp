@@ -57,12 +57,47 @@ void Item::load(nlohmann::json::iterator& item) {
 
 //Creates a new entry with the given key and value and adds it to the item
 bool Item::addEntry(const std::string& key, const std::string& value) {
+    if (key == "" || value == "") {
+        throw std::out_of_range("Error: invalid entry argument(s).");
+    }
     bool newEntry = entries.count(key) != 1;
     if (!newEntry) {
         deleteEntry(key);
     }
     entries.emplace(key, value);
     return newEntry;
+}
+
+//Updates the entry with the given key with the new key and new value
+bool Item::updateEntry(const std::string& oldKey, const std::string& newKey, 
+    const std::string& newValue) {
+    if (entries.count(oldKey) == 1) {
+        deleteEntry(oldKey);
+        return addEntry(newKey, newValue);
+    } else {
+        throw std::out_of_range("Error: invalid entry argument(s).");
+    }
+}
+
+//Updates the entry with the given key with the new key
+bool Item::updateEntryKey(const std::string& oldKey, const std::string& newKey) {
+    if (entries.count(oldKey) == 1) {
+        std::string value = getEntry(oldKey);
+        deleteEntry(oldKey);
+        return addEntry(newKey, value);
+    } else {
+        throw std::out_of_range("Error: invalid entry argument(s).");
+    }
+}
+
+//Updates the entry with the given key with the new value
+bool Item::updateEntryValue(const std::string& key, 
+    const std::string& newValue) {
+    if (entries.count(key) == 1) {
+        return addEntry(key, newValue);
+    } else {
+        throw std::out_of_range("Error: invalid entry argument(s).");
+    }
 }
 
 //Deletes the entry with the given key from the item
