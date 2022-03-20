@@ -15,7 +15,24 @@
 #include "371pass.h"
 #include "wallet.h"
 
-//Runs the application
+// TODO Complete this function. You have been provided some skeleton code which
+//  retrieves the database file name from cxxopts.
+//  1. Load the database file by calling load() on a Wallet object
+//  2. Parse the 'action' argument to decide what action should be taken (
+//     create, read, update, or delete). Read is the easiest to implement, and
+//     update is the hardest. The details of how these arguments work is in the
+//     coursework specification.
+//  4. Save the updated Wallet object to the JSON file if there have been
+//     changes (calling save() on the Wallet object).
+//
+// Some commented out code has been provided. Using some of this will be
+// demonstrated in the coursework video on Canvas. Remember, this coursework is
+// meant to be challenging and testing your understanding of programming in C++.
+// Part of the challenge is figuring things out on your own. That is a major
+// part of software development.
+//
+// Example:
+//  int main(int argc, char *argv[]) { return App::run(argc, argv); }
 int App::run(int argc, char *argv[]) {
 
     // Gets the command line arguments
@@ -60,7 +77,7 @@ int App::run(int argc, char *argv[]) {
 			updateAction(database, wObj, categoryIdent, itemIdent, entry);
 			break;
 		case Action::DELETE:
-			deleteAction(database, wObj, categoryIdent, itemIdent);
+			deleteAction(database, wObj, categoryIdent, itemIdent, entry);
 			break;
 		default:
 			throw std::runtime_error("Unknown action not implemented");
@@ -69,7 +86,11 @@ int App::run(int argc, char *argv[]) {
 
 }
 
-// Create a cxxopts instance
+// Create a cxxopts instance. You do not need to modify this function.
+//
+// Example:
+//  auto options = App::cxxoptsSetup();
+//  auto args = options.parse(argc, argv);
 cxxopts::Options App::cxxoptsSetup() {
     cxxopts::Options cxxopts("371pass", "Student ID: " + STUDENT_NUMBER + "\n");
 
@@ -114,12 +135,19 @@ cxxopts::Options App::cxxoptsSetup() {
 }
 
 //Gets the database filename from the command line if one is given 
-//(database.json if not)
 std::string App::parseDatabaseArgument(cxxopts::ParseResult& args) {
 	return args["db"].as<std::string>();
 }
 
-//Gets the action argument from the command line if one is given
+// TODO Rewrite this function so that it works. This function should
+//  case-insensitively check the action argument retrieved from cxxopts and
+//  convert this to a value from the ACTION enum. If an invalid value is given
+//  in a string, throw an std::invalid_argument exception.
+//
+// Example:
+//  auto options = App::cxxoptsSetup();
+//  auto args = options.parse(argc, argv);
+//  App::Action action = parseActionArgument(args);
 App::Action App::parseActionArgument(cxxopts::ParseResult& args) {
 	Action a;
 	std::string input = args["action"].as<std::string>();
@@ -208,17 +236,31 @@ void App::createItem(Wallet& wObj, const std::string& categoryIdent,
 //Creates the entry in the given item with the given entry details
 void App::createEntry(Wallet& wObj, const std::string& categoryIdent,
     const std::string& itemIdent, const std::string& entry) {
-	std::string key;
-	std::string value;
-	int index = entry.find(",");
-	if (index != -1) {
-		key = entry.substr(0, index);
-		value = entry.substr(index + 1);
-	} else {
-		key = entry;
-		value = "";
+	try {
+		std::string key;
+		std::string value;
+		int indexColon = entry.find(":");
+		if (indexColon != -1) {
+			std::cerr << "Error: entry argument can not contain a colon (:).\n";
+			exit(1);
+		}
+		int indexComma = entry.find(",");
+		if (indexComma != -1 && indexComma == (int) entry.find_last_of(",")) {
+			key = entry.substr(0, indexComma);
+			value = entry.substr(indexComma + 1);
+		} else if (indexComma == -1) {
+			key = entry;
+			value = "";
+		} else {
+			std::cerr << "Error: entry argument can not contain more than one "
+				"comma (,).\n";
+			exit(1);
+		}
+		wObj.getCategory(categoryIdent).getItem(itemIdent).addEntry(key, value);
+	} catch (std::out_of_range& exception) {
+		std::cerr << exception.what() << "\n";
+		exit(1);
 	}
-	wObj.getCategory(categoryIdent).getItem(itemIdent).addEntry(key, value);
 }
 
 //Performs the read action
@@ -384,8 +426,11 @@ void App::updateEntry(Wallet& wObj, const std::string& categoryIdent,
 
 //Performs the delete action
 void App::deleteAction(const std::string& database, Wallet& wObj, 
-        const std::string& categoryIdent, const std::string& itemIdent) {
-	if (itemIdent.compare("") != 0) {
+        const std::string& categoryIdent, const std::string& itemIdent, 
+        const std::string& entry) {
+	if (entry.compare("") != 0) {
+		deleteEntry(wObj, categoryIdent, itemIdent, entry);
+	} else if (itemIdent.compare("") != 0) {
 		deleteItem(wObj, categoryIdent, itemIdent);
 	} else if (categoryIdent.compare("") != 0) {
 		deleteCategory(wObj, categoryIdent);
@@ -417,18 +462,62 @@ void App::deleteItem(Wallet& wObj, const std::string& categoryIdent,
 	}
 }
 
-//Gets the JSON string of a wallet object
+//Deletes the entry based on the given category and item identifier
+void App::deleteEntry(Wallet& wObj, const std::string& categoryIdent,
+    const std::string& itemIdent, const std::string& entry) {
+	try {
+		wObj.getCategory(categoryIdent).getItem(itemIdent).deleteEntry(entry);
+	} catch (std::out_of_range& exception) {
+		std::cerr << exception.what() << "\n";
+		exit(1);
+	}
+}
+
+// TODO Write a function, getJSON, that returns a std::string containing the
+//  JSON representation of a Wallet object.
+//
+// This function has been implemented for you, but you may wish to adjust it.
+// You will have to uncomment the code, which has been left commented to ensure
+// the coursework framework compiles (i.e., it calls functions that you must
+// implement, once you have implemented them you may uncomment this function).
+//
+// Example:
+//  Wallet wObj{};
+//  std::cout << getJSON(wObj);
 std::string App::getJSON(Wallet &wObj) {
     return wObj.str();
 }
 
-//Gets the JSON string of a category object
+// TODO Write a function, getJSON, that returns a std::string containing the
+//  JSON representation of a specific Category in a Wallet object.
+//
+// This function has been implemented for you, but you may wish to adjust it.
+// You will have to uncomment the code, which has been left commented to ensure
+// the coursework framework compiles (i.e., it calls functions that you must
+// implement, once you have implemented them you may uncomment this function).
+//
+// Example:
+//  Wallet wObj{};
+//  std::string c = "category argument value";
+//  std::cout << getJSON(wObj, c);
 std::string App::getJSON(Wallet &wObj, const std::string &c) {
     auto cObj = wObj.getCategory(c);
     return cObj.str();
 }
 
-//Gets the JSON string of a item object
+// TODO Write a function, getJSON, that returns a std::string containing the
+//  JSON representation of a specific Item in a Wallet object.
+//
+// This function has been implemented for you, but you may wish to adjust it.
+// You will have to uncomment the code, which has been left commented to ensure
+// the coursework framework compiles (i.e., it calls functions that you must
+// implement, once you have implemented them you may uncomment this function).
+//
+// Example:
+//  Wallet wObj{};
+//  std::string c = "category argument value";
+//  std::string i = "item argument value";
+//  std::cout << getJSON(wObj, c, i);
 std::string App::getJSON(Wallet &wObj, const std::string &c,
 	const std::string &i) {
     auto cObj = wObj.getCategory(c);
@@ -436,7 +525,20 @@ std::string App::getJSON(Wallet &wObj, const std::string &c,
     return iObj.str();
 }
 
-//Gets the JSON string of a item entry
+// TODO Write a function, getJSON, that returns a std::string containing the
+//  JSON representation of a specific Entry in a Wallet object.
+//
+// This function has been implemented for you, but you may wish to adjust it.
+// You will have to uncomment the code, which has been left commented to ensure
+// the coursework framework compiles (i.e., it calls functions that you must
+// implement, once you have implemented them you may uncomment this function).
+//
+// Example:
+//  Wallet wObj{};
+//  std::string c = "category argument value";
+//  std::string i = "item argument value";
+//  std::string e = "entry argument value";
+//  std::cout << getJSON(wObj, c, i, e);
 std::string App::getJSON(Wallet &wObj, const std::string &c,
 	const std::string &i, const std::string &e) {
     auto cObj = wObj.getCategory(c);

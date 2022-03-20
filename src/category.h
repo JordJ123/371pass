@@ -26,29 +26,25 @@ class Category {
 
     //Constructors & Destructors
     public:
-        Category();
         Category(const std::string& identifier);
         ~Category() = default;
 
-    //Setters & Getters
+    //Methods
     public:
+        const unsigned int size() const;
+        const bool empty() const;
+        const std::string& getIdent();
         void setIdent(const std::string& identifier);
-        std::string& getIdent();
+        Item& newItem(const std::string& itemIdentifier);
+        const bool addItem(Item& item);
         std::map<std::string, Item>& getItems();
         Item& getItem(const std::string& itemIdentifier);
-
-    //Other Methods
-    public:
+        const bool deleteItem(const std::string& itemIdentifier);
         void load(nlohmann::json::iterator& category);
-        Item& newItem(const std::string& itemIdentifier);
-        bool addItem(Item& item);
-        bool deleteItem(const std::string& itemIdentifier);
-        unsigned int size();
-        bool empty();
-        std::string str();
-        nlohmann::json json();
         friend bool operator==(const Category& lhs, const Category& rhs);
-
+        const std::string str();
+        const nlohmann::json json();
+        
 };
 
 #endif // CATEGORY_H

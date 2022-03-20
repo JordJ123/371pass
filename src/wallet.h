@@ -30,23 +30,19 @@ class Wallet {
         Wallet();
         ~Wallet() = default;
 
-    //Getter Methods
+    //Methods
     public:
-        std::map<std::string, Category>& getCategories();
+        const unsigned int size() const;
+        const bool empty() const;
+        Category& newCategory(const std::string& categoryIdentifier);
+        const bool addCategory(Category& category);
         Category& getCategory(const std::string& categoryIdentifier);
-
-    //Other Methods
-    public:
+        const bool deleteCategory(const std::string& categoryIdentifier);
         void load(const std::string& filename);
         void save(const std::string& filename);
-        Category& newCategory(const std::string& categoryIdentifier);
-        bool addCategory(Category& category);
-        bool deleteCategory(const std::string& categoryIdentifier);
-        unsigned int size();
-        bool empty();
-        std::string str();
-        nlohmann::json json();
         friend bool operator==(const Wallet& lhs, const Wallet& rhs);
+        const std::string str();
+        const nlohmann::json json();
   
 };
 

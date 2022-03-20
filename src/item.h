@@ -29,35 +29,30 @@ class Item {
 
     //Constructors & Destructors
     public:
-        Item();
         Item(const std::string& identifier);
         ~Item() = default;
 
-    //Setters & Getters
+    //Methods
     public:
+        const unsigned int size() const;
+        const bool empty() const;
         void setIdent(const std::string& identifier);
-        std::string& getIdent();
+        const std::string& getIdent();
+        const bool addEntry(const std::string& key, const std::string& value);
         std::map<std::string, std::string>& getEntries();
-        std::string& getEntry(const std::string& key);
-
-    //Other Methods
-    public:
-        void load(nlohmann::json::iterator& item);
-        bool addEntry(const std::string& key, const std::string& value);
-        bool updateEntry(const std::string& oldKey, 
+        const std::string& getEntry(const std::string& key);
+        const bool updateEntry(const std::string& oldKey, 
             const std::string& newKey, const std::string& newValue);
-        bool updateEntryKey(const std::string& oldKey, 
+        const bool updateEntryKey(const std::string& oldKey, 
             const std::string& newKey);
-        bool updateEntryValue(const std::string& key, 
+        const bool updateEntryValue(const std::string& key, 
             const std::string& newValue);
-        bool deleteEntry(const std::string& key);
-        unsigned int size();
-        bool empty();
-        std::string str();
-        nlohmann::json json();
+        const bool deleteEntry(const std::string& key);
+        void load(nlohmann::json::iterator& item);
         friend bool operator==(const Item& lhs, const Item& rhs);
+        const std::string str() const;
+        const nlohmann::json json() const;
         
-
 };
 
 #endif // ITEM_H

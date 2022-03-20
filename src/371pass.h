@@ -20,10 +20,26 @@
 
 namespace App {
 
-    //CONSTANTS
+    // TODO: Enter your student number here!
     const std::string STUDENT_NUMBER = "1910397";
 
-    //ENUMS
+    // Enums (short for enumerations) are similar to their Java implementation.
+    // It is a user-defined type, used to assign names to internal constants
+    // in code, instead of simply passing in integers/strings etc.
+    //
+    // For example, functions can take a value/constant from a specific enum
+    // and use it in a switch statement, doing different things
+    //
+    // As such, it is a useful way for us to specify information in both a
+    // machine and human-readable format.
+    //
+    // Unlike Java, enums in C++ only map to integer values. You can either let
+    // the compiler generate the values automatically, in which it allocates a
+    // unique integer (0-indexed). Or, you can set the value by giving the name
+    // followed by = <value> (e.g. CREATE=0).
+    //
+    // This enum specifies the four different values we support in the action
+    // program argument.
     enum Action { 
         CREATE, 
         READ, 
@@ -76,10 +92,13 @@ namespace App {
 
     //Delete Methods
     void deleteAction(const std::string& database, Wallet& wObj, 
-        const std::string& categoryIdent, const std::string& itemIdent);
+        const std::string& categoryIdent, const std::string& itemIdent, 
+        const std::string& entry);
     void deleteCategory(Wallet& wObj, const std::string& categoryIdent);
     void deleteItem(Wallet& wObj, const std::string& categoryIdent,
         const std::string& itemIdent);
+    void deleteEntry(Wallet& wObj, const std::string& categoryIdent,
+        const std::string& itemIdent, const std::string& entry);
 
     //Gets JSON Methods
     std::string getJSON(Wallet &w);
@@ -88,6 +107,6 @@ namespace App {
     std::string getJSON(Wallet &wObj, const std::string &c, 
         const std::string &i, const std::string &e);
 
-}
+} // namespace App
 
 #endif // _371PASS_H
